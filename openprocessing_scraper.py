@@ -7,6 +7,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 import os
 import time
+import shutil
+import zipfile
 
 chrome_options = Options()
 # chrome_options.add_argument("--headless")  # Run Chrome in headless mode
@@ -77,9 +79,16 @@ def download_first_sketch():
 
 
 def process_downloaded_zip(sketch_folder_name):
-    import os
-    import shutil
-    import zipfile
+    # Clear all folders in downloadFOLDER
+    download_folder = os.path.join(os.getcwd(), "downloadFOLDER")
+    if os.path.exists(download_folder):
+        for item in os.listdir(download_folder):
+            item_path = os.path.join(download_folder, item)
+            if os.path.isdir(item_path):
+                shutil.rmtree(item_path)
+                print(f"Removed folder: {item_path}")
+
+    
 
     # Get the default download directory
     download_dir = os.path.expanduser("~/Downloads")
