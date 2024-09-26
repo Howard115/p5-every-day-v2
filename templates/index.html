@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P5.js Sketch</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+
+<body>
+
+
+    <button onclick="runScraper()">Run OpenProcessing Scraper</button>
+    <button onclick="updateP5js()">Update P5.js Files</button>
+    <button onclick="loadP5js()">Load P5.js Sketch</button>
+
+    <script>
+        function runScraper() {
+            fetch('/run_scraper', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Scraper response:', data);
+                    alert('Scraper finished running. Check the console for details.');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while running the scraper.');
+                });
+        }
+
+        function updateP5js() {
+            fetch('/update_p5js')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('P5.js files updated:', data);
+                    alert('P5.js files updated successfully.');
+                })
+                .catch(error => {
+                    console.error('Error updating P5.js files:', error);
+                    alert('An error occurred while updating the P5.js files.');
+                });
+        }
+
+        function loadP5js() {
+            fetch('/load_p5js')
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        console.error('Redirect failed');
+                        alert('Failed to load P5.js sketch.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while loading the P5.js sketch.');
+                });
+        }
+    </script>
+</body>
+
+</html>
