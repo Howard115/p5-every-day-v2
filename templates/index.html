@@ -33,13 +33,22 @@
 
     <button onclick="runScraper()">Run OpenProcessing Scraper</button>
     <div id="loader" class="loader"></div>
+    <div id="loadingTime"></div>
 
     <button onclick="openDownloadFolder()">Open Download Folder</button>
 
     <script>
         function runScraper() {
             const loader = document.getElementById('loader');
+            const loadingTimeElement = document.getElementById('loadingTime');
             loader.style.display = 'inline-block';
+            loadingTimeElement.textContent = 'This process takes about 40 seconds...';
+
+            let startTime = Date.now();
+            let loadingInterval = setInterval(() => {
+                let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                loadingTimeElement.textContent = `This process takes about 40 seconds... (${elapsedTime} seconds elapsed)`;
+            }, 1000);
 
             fetch('/run_scraper', {
                     method: 'POST'
@@ -54,7 +63,10 @@
                     alert('An error occurred while running the scraper.');
                 })
                 .finally(() => {
+                    clearInterval(loadingInterval);
                     loader.style.display = 'none';
+                    let totalTime = Math.floor((Date.now() - startTime) / 1000);
+                    loadingTimeElement.textContent = `Process completed in ${totalTime} seconds (expected: ~40 seconds)`;
                 });
         }
 
