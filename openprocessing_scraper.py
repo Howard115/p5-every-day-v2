@@ -9,9 +9,11 @@ import os
 import time
 import shutil
 import zipfile
+import random
+
 
 chrome_options = Options()
-# chrome_options.add_argument("--headless")  # Run Chrome in headless mode
+chrome_options.add_argument("--headless")  # Run Chrome in headless mode
 driver = webdriver.Chrome(options=chrome_options)
 action_chains = ActionChains(driver)
 
@@ -48,16 +50,16 @@ def sign_in():
 
 
 
-def download_first_sketch():
+def download_random_sketch():
     # Wait for the sketch elements to be present
     sketch_elements = WebDriverWait(driver, 10).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li.sketchLi.col-xs-4.col-sm-3.col-lg-2"))
     )
 
-    # Click the first sketch element
+    # Randomly choose one sketch element
     if sketch_elements:
-        first_sketch = sketch_elements[0]
-        first_sketch.click()
+        random_sketch = random.choice(sketch_elements)
+        random_sketch.click()
     else:
         print("No sketch elements found")
         return
@@ -137,7 +139,7 @@ sign_in()
 
 driver.get("https://openprocessing.org/discover/#/trending")
 
-download_first_sketch()
+download_random_sketch()
 time.sleep(1)
 process_downloaded_zip("sketch_001")
 
