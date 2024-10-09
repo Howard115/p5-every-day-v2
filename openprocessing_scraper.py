@@ -82,7 +82,7 @@ def download_random_sketch():
 
 def process_downloaded_zip(sketch_folder_name):
     # Clear all folders in downloadFOLDER
-    download_folder = os.path.join(os.getcwd(), "downloadFOLDER")
+    download_folder = os.path.join(os.path.dirname(__file__), "downloadFOLDER")
     if os.path.exists(download_folder):
         for item in os.listdir(download_folder):
             item_path = os.path.join(download_folder, item)
@@ -104,7 +104,7 @@ def process_downloaded_zip(sketch_folder_name):
             raise ValueError("Can't find sketchzip")
         
         # Create downloadZIP folder if it doesn't exist
-        download_zip_dir = os.path.join(os.getcwd(), "downloadZIP")
+        download_zip_dir = os.path.join(os.path.dirname(__file__), "downloadZIP")
         os.makedirs(download_zip_dir, exist_ok=True)
         
         # Move the zip file to downloadZIP folder
@@ -113,7 +113,7 @@ def process_downloaded_zip(sketch_folder_name):
         print(f"Moved {latest_zip} to {destination}")
 
         # Create downloadFOLDER if it doesn't exist
-        download_folder = os.path.join(os.getcwd(), "downloadFOLDER")
+        download_folder = os.path.join(os.path.dirname(__file__), "downloadFOLDER")
         os.makedirs(download_folder, exist_ok=True)
 
         # Create the sketch-specific folder inside downloadFOLDER
@@ -144,5 +144,4 @@ time.sleep(1)
 process_downloaded_zip("sketch_001")
 
 driver.quit()
-
 
