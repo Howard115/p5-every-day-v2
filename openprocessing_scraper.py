@@ -1,4 +1,6 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,10 +14,24 @@ import zipfile
 import random
 
 
-chrome_options = Options()
-chrome_options.add_argument("--headless")  # Run Chrome in headless mode
-driver = webdriver.Chrome(options=chrome_options)
-action_chains = ActionChains(driver)
+def initialize_driver():
+    chrome_options = Options()
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--start-maximized")
+    # chrome_options.add_argument("--headless")  # Uncomment if you want to run in headless mode
+
+    # Use webdriver_manager to automatically manage ChromeDriver
+    service = Service(ChromeDriverManager().install())
+    
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    action_chains = ActionChains(driver)
+    
+    return driver, action_chains
+
+# Use the function to initialize the driver
+driver, action_chains = initialize_driver()
 
 
 def sign_in():
@@ -77,10 +93,29 @@ def download_random_sketch():
     )
     # Click the download link
     download_link.click()
+    
+    # Wait for the file to be downloaded
+    wait_for_download()
 
+def wait_for_download():
+    download_dir = os.path.expanduser("~/Downloads")
+    timeout = 60  # Maximum wait time in seconds
+    interval = 1  # Check interval in seconds
+    
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        zip_files = [f for f in os.listdir(download_dir) if f.endswith('.zip')]
+        if zip_files:
+            latest_zip = max([os.path.join(download_dir, f) for f in zip_files], key=os.path.getmtime)
+            if "sketch" in os.path.basename(latest_zip).lower():
+                # Wait a bit more to ensure the download is complete
+                time.sleep(2)
+                return
+        time.sleep(interval)
+    
+    raise TimeoutError("Download timeout: No sketch zip file found within the specified time.")
 
-
-def process_downloaded_zip(sketch_folder_name):
+def process_downloaded_zip():
     # Clear all folders in downloadFOLDER
     download_folder = os.path.join(os.path.dirname(__file__), "downloadFOLDER")
     if os.path.exists(download_folder):
@@ -89,8 +124,6 @@ def process_downloaded_zip(sketch_folder_name):
             if os.path.isdir(item_path):
                 shutil.rmtree(item_path)
                 print(f"Removed folder: {item_path}")
-
-    
 
     # Get the default download directory
     download_dir = os.path.expanduser("~/Downloads")
@@ -102,6 +135,10 @@ def process_downloaded_zip(sketch_folder_name):
         # Check if the zip file name contains "sketch"
         if "sketch" not in os.path.basename(latest_zip).lower():
             raise ValueError("Can't find sketchzip")
+        
+        # Extract the sketch ID from the zip file name
+        sketch_folder_name = os.path.splitext(os.path.basename(latest_zip))[0]
+        sketch_id = sketch_folder_name.split('sketch')[-1]
         
         # Create downloadZIP folder if it doesn't exist
         download_zip_dir = os.path.join(os.path.dirname(__file__), "downloadZIP")
@@ -117,7 +154,7 @@ def process_downloaded_zip(sketch_folder_name):
         os.makedirs(download_folder, exist_ok=True)
 
         # Create the sketch-specific folder inside downloadFOLDER
-        sketch_folder = os.path.join(download_folder, sketch_folder_name)
+        sketch_folder = os.path.join(download_folder, 'sketch')
         os.makedirs(sketch_folder, exist_ok=True)
 
         # Extract the contents of the zip file to the sketch-specific folder
@@ -129,8 +166,11 @@ def process_downloaded_zip(sketch_folder_name):
         # Remove the original zip file after extraction
         os.remove(destination)
         print(f"Removed original zip file: {destination}")
+        
+        return sketch_id  # Return the sketch ID
     else:
         print("No zip file found in the download directory")
+        return None
 
 # Navigate to the OpenProcessing trending page
 driver.get("https://openprocessing.org/discover/#/trending")
@@ -140,8 +180,11 @@ sign_in()
 driver.get("https://openprocessing.org/discover/#/trending")
 
 download_random_sketch()
-time.sleep(1)
-process_downloaded_zip("sketch_001")
+sketch_id = process_downloaded_zip()
+if sketch_id:
+    print(f"Processed sketch: {sketch_id}")
+else:
+    print("Failed to process sketch")
 
 driver.quit()
 

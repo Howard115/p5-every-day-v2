@@ -56,6 +56,9 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log('Scraper response:', data);
+                    if (data.sketch_id) {
+                        console.log('Sketch ID:', data.sketch_id);
+                    }
                     alert('Scraper finished running. Check the console for details.');
                 })
                 .catch(error => {
@@ -72,7 +75,7 @@
 
 
         function openDownloadFolder() {
-            window.location.href = '/downloadFOLDER/sketch_001/index.html';
+            window.location.href = '/downloadFOLDER/sketch/index.html';
         }
     </script>
 </body>
